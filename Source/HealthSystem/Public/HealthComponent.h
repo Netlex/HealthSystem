@@ -33,12 +33,18 @@ public:
 	virtual void TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 	// Add value for armor
-	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "Health System|Armour")
+	UFUNCTION(BlueprintCallable, Category = "Health System|Armour")
 		void AddArmor(const float Value);
 
+	UFUNCTION(Reliable, Server)
+        void ServerAddArmor(const float Value);
+
 	// Add value for health
-	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "Health System|Health")
-		void AddHealth(const float Value);
+	UFUNCTION(BlueprintCallable, Category = "Health System|Health")
+        void AddHealth(const float Value);
+
+	UFUNCTION(Reliable, Server)
+		void ServerAddHealth(const float Value);
 
 	UFUNCTION(BlueprintGetter, Category = "Health System|Health")
 	float GetCurrentHealth() const

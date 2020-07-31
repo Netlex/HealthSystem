@@ -151,24 +151,34 @@ void UHealthComponent::TakeDamage(float Damage, const FDamageEvent& DamageEvent,
 	}
 }
 
-void UHealthComponent::AddHealth_Implementation(const float Value)
-{
-	GrantHealth(Value);
-}
-
-bool UHealthComponent::AddHealth_Validate(const float Value)
-{
-	return true;
-}
-
-void UHealthComponent::AddArmor_Implementation(const float Value)
+void UHealthComponent::AddArmor(const float Value)
 {
 	GrantShield(Value);
+	
+	if (!GetOwner()->HasAuthority())
+	{
+		ServerAddArmor(Value);
+	}
 }
 
-bool UHealthComponent::AddArmor_Validate(const float Value)
+void UHealthComponent::AddHealth(const float Value)
 {
-	return true;
+	GrantHealth(Value);
+	
+	if (!GetOwner()->HasAuthority())
+	{
+		ServerAddHealth(Value);
+	}
+}
+
+void UHealthComponent::ServerAddHealth_Implementation(const float Value)
+{
+	AddHealth(Value);
+}
+
+void UHealthComponent::ServerAddArmor_Implementation(const float Value)
+{
+	AddArmor(Value);
 }
 
 bool UHealthComponent::GrantHealth(const float Value)

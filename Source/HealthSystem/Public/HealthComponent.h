@@ -1,7 +1,5 @@
 // Project:         Health System
 // Copyright:       Copyright (C) 2020 Netlex Studio
-// License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
-// Source Code:     https://github.com/Netlex/HealthSystem
 // Original Author: Netlex Studio
 
 #pragma once
@@ -10,7 +8,6 @@
 #include "Components/ActorComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/Actor.h"
-#include "TimerManager.h"
 #include "HealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FFloatValue, float, Current, float, Max);
@@ -32,41 +29,43 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UFUNCTION(BlueprintCallable, Category = "Health System")
-		virtual void TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	// Damage handling
+	virtual void TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
-	UFUNCTION(BlueprintCallable, Category = "Health System|Armour")
-		bool GrantShield(float Value);
+	// Add value for armor
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "Health System|Armour")
+		void AddArmor(const float Value);
 
-	UFUNCTION(BlueprintCallable, Category = "Health System|Health")
-		bool GrantHealth(float Value);
+	// Add value for health
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "Health System|Health")
+		void AddHealth(const float Value);
 
-	UFUNCTION(BlueprintPure, Category = "Health System|Health")
-	FORCEINLINE float GetCurrentHealth() const
+	UFUNCTION(BlueprintGetter, Category = "Health System|Health")
+	float GetCurrentHealth() const
 	{
 		return CurrentHealth;
 	}
 
-	UFUNCTION(BlueprintPure, Category = "Health System|Health")
-	FORCEINLINE float GetMaxHealth() const
+	UFUNCTION(BlueprintGetter, Category = "Health System|Health")
+	float GetMaxHealth() const
 	{
 		return MaxHealth;
 	}
 
-	UFUNCTION(BlueprintPure, Category = "Health System|Armour")
-	FORCEINLINE bool IsUseArmour() const
+	UFUNCTION(BlueprintGetter, Category = "Health System|Armour")
+	bool IsUseArmour() const
 	{
 		return bIsUseArmour;
 	}
 
-	UFUNCTION(BlueprintPure, Category = "Health System|Armour")
-	FORCEINLINE float GetCurrentArmour() const
+	UFUNCTION(BlueprintGetter, Category = "Health System|Armour")
+	float GetCurrentArmour() const
 	{
 		return CurrentArmour;
 	}
 
-	UFUNCTION(BlueprintPure, Category = "Health System|Armour")
-	FORCEINLINE float GetMaxArmour() const
+	UFUNCTION(BlueprintGetter, Category = "Health System|Armour")
+	float GetMaxArmour() const
 	{
 		return MaxArmour;
 	}
@@ -83,14 +82,17 @@ public:
 		FDeathEvent Death;
 
 protected:
+	
+	bool GrantShield(const float Value);
+	bool GrantHealth(const float Value);
 
-	UFUNCTION(BlueprintCallable, Category = "Health System")
+	UFUNCTION(BlueprintCallable, Category = "Health System", meta = (BlueprintProtected))
 	void OnAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-	UFUNCTION(BlueprintCallable, Category = "Health System")
+	UFUNCTION(BlueprintCallable, Category = "Health System", meta = (BlueprintProtected))
 	void OnPointDamage(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser);
 
-	UFUNCTION(BlueprintCallable, Category = "Health System")
+	UFUNCTION(BlueprintCallable, Category = "Health System", meta = (BlueprintProtected))
 	void OnRadialDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser);
 
 	// Notifies all clients that a the actor has been hit and from what direction.
@@ -111,7 +113,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth, Category = "Health")
 		float CurrentHealth;
 
-	// Max armour this actor can have.
+	// Enable/Disable use of armor.
 	UPROPERTY(EditDefaultsOnly, Category = "Armour")
 		bool bIsUseArmour = true;
 
@@ -128,12 +130,15 @@ protected:
 	UFUNCTION()
 		void RegenerateHealth();
 
+	// The value that will increase the health during regeneration.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 		float HealthRegenValue;
 
+	// Delay before starting regeneration health.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 		float HealthRegenCooldown;
 
+	// The rate of reaction health.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 		float HealthRegenInterval;
 
@@ -142,12 +147,15 @@ protected:
 	UFUNCTION()
 		void RegenerateArmour();
 
+	// The value that will increase the armor during regeneration.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armour", meta = (editcondition = "bIsUseArmour"))
 		float ArmourRegenValue;
 
+	// Delay before starting regeneration armor.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armour", meta = (editcondition = "bIsUseArmour"))
 		float ArmourRegenCooldown;
 
+	// The rate of reaction armor.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armour", meta = (editcondition = "bIsUseArmour"))
 		float ArmourRegenInterval;
 	

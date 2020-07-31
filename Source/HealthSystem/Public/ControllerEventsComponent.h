@@ -1,7 +1,5 @@
 // Project:         Health System
 // Copyright:       Copyright (C) 2020 Netlex Studio
-// License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
-// Source Code:     https://github.com/Netlex/HealthSystem
 // Original Author: Netlex Studio
 
 #pragma once
@@ -12,9 +10,9 @@
 #include "ControllerEventsComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FControllerEvent, const AController*, Controller);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FKillDetailsEvent, const FString&, VictimName, int32, VictimId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FKillDetailsEvent, const APlayerState*, Victim);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class HEALTHSYSTEM_API UControllerEventsComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -33,9 +31,9 @@ public:
 		FControllerEvent KillEvent;
 
 	UFUNCTION(Client, Reliable)
-		void ClientInformOfKill(const FString& VictimName, int32 VictimId);
+		void ClientInformOfKill(const APlayerState* Victim);
 	UFUNCTION(Client, Reliable)
-		void ClientInformOfDeath(const FString& KillerName, int32 KillerId);
+		void ClientInformOfDeath(const APlayerState* Killer);
 	
 	UPROPERTY(BlueprintAssignable)
 		FKillDetailsEvent KillDetailsEvent;

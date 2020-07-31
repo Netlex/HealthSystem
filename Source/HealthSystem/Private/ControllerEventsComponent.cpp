@@ -1,7 +1,5 @@
 // Project:         Health System
 // Copyright:       Copyright (C) 2020 Netlex Studio
-// License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
-// Source Code:     https://github.com/Netlex/HealthSystem
 // Original Author: Netlex Studio
 
 #include "ControllerEventsComponent.h"
@@ -23,7 +21,7 @@ void UControllerEventsComponent::Death_Implementation(const AController* Killer)
 		APlayerState* KillerPlayerState = Killer->PlayerState;
 		if (KillerPlayerState != nullptr)
 		{
-			ClientInformOfDeath(KillerPlayerState->GetPlayerName(), KillerPlayerState->GetPlayerId());
+			ClientInformOfDeath(KillerPlayerState);
 		}
 	}
 }
@@ -37,17 +35,17 @@ void UControllerEventsComponent::Kill_Implementation(const AController* Victim)
 		APlayerState* VictimPlayerState = Victim->PlayerState;
 		if (VictimPlayerState != nullptr)
 		{
-			ClientInformOfKill(VictimPlayerState->GetPlayerName(), VictimPlayerState->GetPlayerId());
+			ClientInformOfKill(VictimPlayerState);
 		}
 	}
 }
 
-void UControllerEventsComponent::ClientInformOfKill_Implementation(const FString& VictimName, int32 VictimId)
+void UControllerEventsComponent::ClientInformOfKill_Implementation(const APlayerState* Victim)
 {
-	KillDetailsEvent.Broadcast(VictimName, VictimId);
+	KillDetailsEvent.Broadcast(Victim);
 }
 
-void UControllerEventsComponent::ClientInformOfDeath_Implementation(const FString& KillerName, int32 KillerId)
+void UControllerEventsComponent::ClientInformOfDeath_Implementation(const APlayerState* Killer)
 {
-	DeathDetailsEvent.Broadcast(KillerName, KillerId);
+	DeathDetailsEvent.Broadcast(Killer);
 }

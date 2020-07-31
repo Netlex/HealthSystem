@@ -1,19 +1,16 @@
 // Project:         Health System
 // Copyright:       Copyright (C) 2020 Netlex Studio
-// License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
-// Source Code:     https://github.com/Netlex/HealthSystem
 // Original Author: Netlex Studio
 
 #include "HealthComponent.h"
-#include "IDamageHealth.h"
+#include "IProcessingDamage.h"
 #include "GameFramework/Pawn.h"
-#include "GameFramework/PlayerState.h"
 #include "ControllerEventsComponent.h"
 #include "Net/UnrealNetwork.h"
 
 UHealthComponent::UHealthComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	SetIsReplicatedByDefault(true);
 
@@ -58,21 +55,21 @@ void UHealthComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UHealthComponent::TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (GetOwner()->Implements<UDamageHealth>())
+	if (GetOwner()->Implements<UProcessingDamage>())
 	{
-		if (!IDamageHealth::Execute_CanApplyDamage(GetOwner(), DamageCauser))
+		if (!IProcessingDamage::Execute_CanApplyDamage(GetOwner(), DamageCauser))
 		{
 			return;
 		}
 
-		IDamageHealth::Execute_ModifireDamage(GetOwner(), DamageCauser, Damage);
+		IProcessingDamage::Execute_ModifireDamage(GetOwner(), DamageCauser, Damage);
 	}
 
 	int32 DamageDealt;
 
 	if (bIsUseArmour)
 	{
-		int32 ArmourRemoved = FMath::Min(Damage, CurrentArmour);
+		const int32 ArmourRemoved = FMath::Min(Damage, CurrentArmour);
 		CurrentArmour -= ArmourRemoved;
 		DamageDealt = FMath::Min(Damage - ArmourRemoved, CurrentHealth);
 	}
@@ -81,9 +78,9 @@ void UHealthComponent::TakeDamage(float Damage, const FDamageEvent& DamageEvent,
 		DamageDealt = FMath::Min(Damage, CurrentHealth);
 	}
 
-	bool bWasDead = CurrentHealth <= 0.f;
+	const bool bWasDead = CurrentHealth <= 0.f;
 	CurrentHealth -= DamageDealt;
-	bool bIsDead = CurrentHealth <= 0.f;
+	const bool bIsDead = CurrentHealth <= 0.f;
 
 	FVector Source;
 	FVector Impact;
@@ -154,7 +151,27 @@ void UHealthComponent::TakeDamage(float Damage, const FDamageEvent& DamageEvent,
 	}
 }
 
-bool UHealthComponent::GrantHealth(float Value)
+void UHealthComponent::AddHealth_Implementation(const float Value)
+{
+	GrantHealth(Value);
+}
+
+bool UHealthComponent::AddHealth_Validate(const float Value)
+{
+	return true;
+}
+
+void UHealthComponent::AddArmor_Implementation(const float Value)
+{
+	GrantShield(Value);
+}
+
+bool UHealthComponent::AddArmor_Validate(const float Value)
+{
+	return true;
+}
+
+bool UHealthComponent::GrantHealth(const float Value)
 {
 	if (CurrentHealth < MaxHealth)
 	{
@@ -166,7 +183,7 @@ bool UHealthComponent::GrantHealth(float Value)
 	return false;
 }
 
-bool UHealthComponent::GrantShield(float Value)
+bool UHealthComponent::GrantShield(const float Value)
 {
 	if (CurrentArmour < MaxArmour)
 	{
@@ -199,6 +216,20 @@ void UHealthComponent::OnRep_CurrentArmour()
 	ArmourUpdated.Broadcast(CurrentArmour, MaxArmour);
 }
 
+void UHealthComponent::OnRep_CurrentHealth()
+{
+	HealthUpdated.Broadcast(CurrentHealth, MaxHealth);
+	if (CurrentHealth <= 0.f)
+	{
+		Death.Broadcast();
+	}
+}
+
+void UHealthComponent::MulticastDamageTaken_Implementation(float Value, FVector Source, FVector Impact, AActor* DamageCauser)
+{
+	DamageTaken.Broadcast(Value, Source, Impact, DamageCauser);
+}
+
 void UHealthComponent::OnAnyDamage(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
 	TakeDamage(Damage, FDamageEvent(), InstigatedBy, DamageCauser);
@@ -212,18 +243,4 @@ void UHealthComponent::OnPointDamage(AActor * DamagedActor, float Damage, AContr
 void UHealthComponent::OnRadialDamage(AActor * DamagedActor, float Damage, const UDamageType * DamageType, FVector Origin, FHitResult HitInfo, AController * InstigatedBy, AActor * DamageCauser)
 {
 	TakeDamage(Damage, FRadialDamageEvent(), InstigatedBy, DamageCauser);
-}
-
-void UHealthComponent::OnRep_CurrentHealth()
-{
-	HealthUpdated.Broadcast(CurrentHealth, MaxHealth);
-	if (CurrentHealth <= 0.f)
-	{
-		Death.Broadcast();
-	}
-}
-
-void UHealthComponent::MulticastDamageTaken_Implementation(float Value, FVector Source, FVector Impact, AActor* DamageCauser)
-{
-	DamageTaken.Broadcast(Value, Source, Impact, DamageCauser);
 }

@@ -11,6 +11,7 @@
 	"DocsURL": "https://docs.google.com/document/d/19PKYPblL0MaAD-zOW4hwNs62fvXhkgbFjSzTEGMoaP4/edit?usp=sharing",
 	"MarketplaceURL": "https://publish.unrealengine.com/v2/edit-product/665062f824914de29dd902b1b6f6d5d7",
 	"SupportURL": "",
+	"WhitelistPlatforms": [ "Win64", "Win32", "Mac", "IOS", "Android", "Linux" ],
 	"EnabledByDefault": true,
 	"CanContainContent": true,
 	"IsBetaVersion": false,

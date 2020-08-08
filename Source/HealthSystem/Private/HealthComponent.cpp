@@ -7,6 +7,8 @@
 #include "GameFramework/Pawn.h"
 #include "ControllerEventsComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "TimerManager.h"
+
 
 UHealthComponent::UHealthComponent()
 {

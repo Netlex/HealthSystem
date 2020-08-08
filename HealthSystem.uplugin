@@ -2,26 +2,30 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"EngineVersion" : "4.25",
 	"FriendlyName": "Health System",
 	"Description": "Flexible health and armor system that can be connected to any Actor, including a character.",
 	"Category": "Gameplay",
 	"CreatedBy": "Netlex Studio",
 	"CreatedByURL": "https://github.com/Netlex",
 	"DocsURL": "https://docs.google.com/document/d/19PKYPblL0MaAD-zOW4hwNs62fvXhkgbFjSzTEGMoaP4/edit?usp=sharing",
-	"MarketplaceURL": "https://publish.unrealengine.com/v2/edit-product/665062f824914de29dd902b1b6f6d5d7",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/665062f824914de29dd902b1b6f6d5d7",
 	"SupportURL": "",
-	"WhitelistPlatforms": [ "Win64", "Win32", "Mac", "IOS", "Android", "Linux" ],
-	"EnabledByDefault": true,
+	"EngineVersion": "4.25.0",
 	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
-	"Installed": false,
+	"Installed": true,
 	"Modules": [
 		{
 			"Name": "HealthSystem",
 			"Type": "Runtime",
-			"LoadingPhase": "PreLoadingScreen"
+			"LoadingPhase": "PreLoadingScreen",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Win32",
+				"Mac",
+				"Linux",
+				"Android",
+				"IOS"
+			]
 		}
 	]
 }
